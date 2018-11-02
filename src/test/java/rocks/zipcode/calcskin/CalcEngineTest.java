@@ -38,4 +38,16 @@ public class CalcEngineTest {
     public void divide() {
         Assert.assertTrue("", (testCalc.divide(10.0, 2.0) == 5.0));
     }
+
+    @Test
+    public void squared() {Assert.assertTrue("", (testCalc.squared(5) == 25));}
+
+    @Test
+    public void sqrt() {Assert.assertTrue("", testCalc.sqrt(9)==3);}
+
+    @Test
+    public void inverse() { Assert.assertTrue("", testCalc.inverse(10)==.1);}
+
+    @Test
+    public void exponent() { Assert.assertTrue("", testCalc.exponent(2,3)==8);}
 }

@@ -24,10 +24,10 @@ public class CalcSkin extends Application {
         launch(args);
     }
     private static final String[][] template = {
-            { "7", "8", "9", "/" },
-            { "4", "5", "6", "*" },
-            { "1", "2", "3", "-" },
-            { "0", "c", "=", "+" }
+            { "7", "8", "9", "/", "x^2", "MC", "sin" },
+            { "4", "5", "6", "*", "SQRT", "MR", "cos" },
+            { "1", "2", "3", "-", "1/x", "M+", "tan" },
+            { "0", "c", "=", "+", "x^y" }
     };
 
     private final Map<String, Button> accelerators = new HashMap<>();
@@ -35,8 +35,9 @@ public class CalcSkin extends Application {
     private DoubleProperty previousValue = new SimpleDoubleProperty();
     private DoubleProperty currentValue = new SimpleDoubleProperty();
     private CalcEngine calcEngine = new CalcEngine();
+    private DoubleProperty memoryValue = new SimpleDoubleProperty();
 
-    private enum Op { NOOP, ADD, SUBTRACT, MULTIPLY, DIVIDE }
+    private enum Op { NOOP, ADD, SUBTRACT, MULTIPLY, DIVIDE, SQUARED, SQUAREROOT, INVERSE, EXPONENT }
 
     private Op curOp   = Op.NOOP;
     private Op stackOp = Op.NOOP;
@@ -82,9 +83,9 @@ public class CalcSkin extends Application {
     private TextField createScreen() {
         final TextField screen = new TextField();
         screen.setStyle("-fx-background-color: aquamarine;");
-        screen.setAlignment(Pos.CENTER_RIGHT);
+        screen.setAlignment(Pos.CENTER_LEFT);
         screen.setEditable(false);
-        screen.textProperty().bind(Bindings.format("%.0f", currentValue));
+        screen.textProperty().bind(Bindings.format("%.4f", currentValue));
         return screen;
     }
 
@@ -114,7 +115,27 @@ public class CalcSkin extends Application {
                 makeClearButton(button);
             } else if ("=".equals(s)) {
                 makeEqualsButton(button);
+            } else if ("x^2".equals(s)) {
+                makeSquaredButton(button);
+            } else if ("SQRT".equals(s)){
+                makeSqrtButton(button);
+            } else if ("1/x".equals(s)){
+                makeInverseButton(button);
+            } else if ("M+".equals(s)){
+                makeMemoryAddButton(button);
+            } else if ("MR".equals(s)){
+                makeMemoryRecallButton(button);
+            } else if ("MC".equals(s)){
+                makeMemoryClearButton(button);
+            } else if ("sin".equals(s)){
+                makeSinButton(button);
+            } else if ("cos".equals(s)) {
+                makeCosButton(button);
+            } else if ("tan".equals(s)) {
+                makeTanButton(button);
             }
+            //make else ifs for the single numeric functions
+            //call the new method for those functions
         }
 
         return button;
@@ -127,6 +148,10 @@ public class CalcSkin extends Application {
             case "-": triggerOp.set(Op.SUBTRACT); break;
             case "*": triggerOp.set(Op.MULTIPLY); break;
             case "/": triggerOp.set(Op.DIVIDE);   break;
+            //case "x^2": triggerOp.set(Op.SQUARED); break;
+            //case "SQRT": triggerOp.set(Op.SQUAREROOT); break;
+            //case "1/x": triggerOp.set(Op.INVERSE); break;
+            case "x^y": triggerOp.set(Op.EXPONENT); break;
         }
         return triggerOp;
     }
@@ -175,6 +200,96 @@ public class CalcSkin extends Application {
         });
     }
 
+    private void makeSquaredButton(Button button) {
+        button.setStyle("-fx-base: darkgray");
+        button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                currentValue.set(calcEngine.squared(currentValue.get()));
+            }
+        });
+    }
+
+    private void makeSqrtButton(Button button) {
+        button.setStyle("-fx-base: darkgray;");
+        button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                currentValue.set(calcEngine.sqrt(currentValue.get()));
+            }
+        });
+    }
+
+    private void makeInverseButton(Button button) {
+        button.setStyle("-fx-base: darkgray;");
+        button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                currentValue.set(calcEngine.inverse(currentValue.get()));
+            }
+        });
+    }
+
+    private void makeMemoryAddButton(Button button) {
+        button.setStyle("-fx-base: gray");
+        button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                memoryValue.set(currentValue.get());
+            }
+        });
+    }
+
+    private void makeMemoryRecallButton(Button button) {
+        button.setStyle("-fx-base: gray");
+        button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                currentValue.set(memoryValue.get());
+            }
+        });
+    }
+
+    private void makeMemoryClearButton(Button button) {
+        button.setStyle("-fx-base: gray");
+        button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                memoryValue.set(0);
+            }
+        });
+    }
+
+    private void makeSinButton(Button button) {
+        button.setStyle("-fx-base: black");
+        button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                currentValue.set(Math.sin(currentValue.get()));
+            }
+        });
+    }
+
+    private void makeCosButton(Button button) {
+        button.setStyle("-fx-base: black");
+        button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                currentValue.set(Math.cos(currentValue.get()));
+            }
+        });
+    }
+
+    private void makeTanButton(Button button) {
+        button.setStyle("-fx-base: black");
+        button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                currentValue.set(Math.tan(currentValue.get()));
+            }
+        });
+    }
+
     private void makeEqualsButton(Button button) {
         button.setStyle("-fx-base: ghostwhite;");
         button.setOnAction(new EventHandler<ActionEvent>() {
@@ -185,10 +300,19 @@ public class CalcSkin extends Application {
                     case SUBTRACT: currentValue.set(calcEngine.subtract(previousValue.get(), currentValue.get())); break;
                     case MULTIPLY: currentValue.set(calcEngine.multiply(previousValue.get(), currentValue.get())); break;
                     case DIVIDE:   currentValue.set(calcEngine.divide(previousValue.get(), currentValue.get())); break;
+                    //case SQUARED:   currentValue.set(calcEngine.squared(currentValue.get())); break;
+                    //case SQUAREROOT:   currentValue.set(calcEngine.sqrt(currentValue.get())); break;
+                    //case INVERSE:   currentValue.set(calcEngine.inverse(currentValue.get())); break;
+                    case EXPONENT:   currentValue.set(calcEngine.exponent(previousValue.get(), currentValue.get())); break;
+
+
+
                 }
             }
         });
     }
+
+
 }
 
 
