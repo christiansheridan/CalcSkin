@@ -291,7 +291,7 @@ public class CalcSkin extends Application {
     }
 
     private void makeEqualsButton(Button button) {
-        button.setStyle("-fx-base: ghostwhite;");
+        button.setStyle("-fx-base: white;");
         button.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
